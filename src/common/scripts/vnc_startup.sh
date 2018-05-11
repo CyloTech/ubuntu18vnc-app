@@ -2,9 +2,9 @@
 ### every exit != 0 fails the script
 set -x
 
-# TODO: Make an expect to do this!
+# TODO: Make this work.
 echo -e "\n\n------------------ Set User Password ------------------"
-echo -e "temp123\poop123\poop123" | passwd appbox
+echo -e "letmein\poop123\poop123" | passwd appbox
 
 # should also source $STARTUPDIR/generate_container_user
 source $HOME/.bashrc
@@ -64,7 +64,8 @@ echo -e "start vncserver with param: VNC_COL_DEPTH=$VNC_COL_DEPTH, VNC_RESOLUTIO
 if [[ $DEBUG == true ]]; then echo "vncserver $DISPLAY -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION"; fi
 vncserver $DISPLAY -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION &> $STARTUPDIR/no_vnc_startup.log
 echo -e "start window manager\n..."
-$HOME/wm_startup.sh &> $STARTUPDIR/wm_startup.log
+mkdir -p $HOME/logs
+$HOME/wm_startup.sh &> $STARTUPDIR/logs/wm_startup.log
 
 ## log connect options
 echo -e "\n\n------------------ VNC environment started ------------------"

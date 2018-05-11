@@ -1,17 +1,13 @@
 FROM ubuntu:18.04
 
-MAINTAINER Tobias Schneck "tobias.schneck@consol.de"
+MAINTAINER Cylo "noc@cylo.io"
 
-## Connection ports for controlling the UI:
-# VNC port:5901
-# noVNC webport, connect via http://IP:6901/?password=vncpassword
 ENV DISPLAY=:1 \
     VNC_PORT=5901 \
     NO_VNC_PORT=6901
-EXPOSE $VNC_PORT $NO_VNC_PORT
 
 ### Envrionment config
-ENV HOME=/usr/local/appbox \
+ENV HOME=/home/appbox \
     TERM=xterm \
     STARTUPDIR=/dockerstartup \
     INST_SCRIPTS=/usr/local/appbox/install \
@@ -21,8 +17,7 @@ ENV HOME=/usr/local/appbox \
     VNC_RESOLUTION=1360x768 \
     VNC_PW=letmein \
     VNC_VIEW_ONLY=false \
-    USER_PASSWORD=letmein \
-    ROOT_PASSWORD=letrootin
+    USER_PASSWORD=letmein
 WORKDIR $HOME
 
 ### Add all install scripts for further steps
@@ -53,12 +48,15 @@ RUN $INST_SCRIPTS/set_user_permission.sh $STARTUPDIR $HOME
 
 RUN adduser -u 1000 appbox
 RUN usermod -aG sudo appbox
-RUN echo "appbox:temp123" | chpasswd
-#RUN echo "root:fbF@ef2g5" | chpasswd
 
+# Set it once before we switch to the user so that it has a password to update.
+RUN echo "appbox:letmein" | chpasswd
+
+# Switch to the new user.
 USER 1000:1000
 
-EXPOSE 80 22
+# Expose ports
+EXPOSE 80 22 ${VNC_PORT} ${NO_VNC_PORT}
 
 ENTRYPOINT ["/dockerstartup/vnc_startup.sh"]
 CMD ["--wait"]
