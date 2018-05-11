@@ -14,7 +14,7 @@ ENV HOME=/home/appbox \
     NO_VNC_HOME=/usr/local/appbox/noVNC \
     DEBIAN_FRONTEND=noninteractive \
     VNC_COL_DEPTH=24 \
-    VNC_RESOLUTION=1360x768 \
+    VNC_RESOLUTION=1280x800 \
     VNC_PW=letmein \
     VNC_VIEW_ONLY=false \
     USER_PASSWORD=letmein
@@ -46,17 +46,17 @@ RUN $INST_SCRIPTS/libnss_wrapper.sh
 ADD ./src/common/scripts $STARTUPDIR
 RUN $INST_SCRIPTS/set_user_permission.sh $STARTUPDIR $HOME
 
+ADD ./src/runasroot.sh /dockerstartup/runasroot.sh
+RUN chmod +x /dockerstartup/runasroot.sh
+
+ADD ./src/supervisord.conf /etc/supervisord.conf
+RUN rm -fr /etc/ssh/sshd_config
+ADD ./src/sshd_config /etc/ssh/sshd_config
+
 RUN adduser -u 1000 appbox
 RUN usermod -aG sudo appbox
-
-# Set it once before we switch to the user so that it has a password to update.
-RUN echo "appbox:letmein" | chpasswd
-
-# Switch to the new user.
-USER 1000:1000
 
 # Expose ports
 EXPOSE 80 22 ${VNC_PORT} ${NO_VNC_PORT}
 
-ENTRYPOINT ["/dockerstartup/vnc_startup.sh"]
-CMD ["--wait"]
+CMD ["/dockerstartup/runasroot.sh"]

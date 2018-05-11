@@ -2,9 +2,7 @@
 ### every exit != 0 fails the script
 set -x
 
-# TODO: Make this work.
-echo -e "\n\n------------------ Set User Password ------------------"
-echo -e "letmein\poop123\poop123" | passwd appbox
+
 
 # should also source $STARTUPDIR/generate_container_user
 source $HOME/.bashrc
@@ -37,6 +35,9 @@ VNC_IP=$(hostname -i)
 ## change vnc password
 echo -e "\n------------------ change VNC password  ------------------"
 # first entry is control, second is view (if only one is valid for both)
+
+chown -R appbox:appbox $HOME
+
 mkdir -p "$HOME/.vnc"
 PASSWD_PATH="$HOME/.vnc/passwd"
 if [[ $VNC_VIEW_ONLY == "true" ]]; then
@@ -47,42 +48,38 @@ fi
 echo "$VNC_PW" | vncpasswd -f >> $PASSWD_PATH
 chmod 600 $PASSWD_PATH
 
-
-## start vncserver and noVNC webclient
-echo -e "\n------------------ start noVNC  ----------------------------"
-if [[ $DEBUG == true ]]; then echo "$NO_VNC_HOME/utils/launch.sh --vnc localhost:$VNC_PORT --listen $NO_VNC_PORT"; fi
-$NO_VNC_HOME/utils/launch.sh --vnc localhost:$VNC_PORT --listen $NO_VNC_PORT &> $STARTUPDIR/no_vnc_startup.log &
-PID_SUB=$!
-
-echo -e "\n------------------ start VNC server ------------------------"
 echo "remove old vnc locks to be a reattachable container"
-vncserver -kill $DISPLAY &> $STARTUPDIR/vnc_startup.log \
-    || rm -rfv /tmp/.X*-lock /tmp/.X11-unix &> $STARTUPDIR/vnc_startup.log \
-    || echo "no locks present"
+rm -rfv /tmp/.X*-lock /tmp/.X11-unix &> $STARTUPDIR/vnc_startup.log \
+|| echo "no locks present"
 
-echo -e "start vncserver with param: VNC_COL_DEPTH=$VNC_COL_DEPTH, VNC_RESOLUTION=$VNC_RESOLUTION\n..."
-if [[ $DEBUG == true ]]; then echo "vncserver $DISPLAY -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION"; fi
-vncserver $DISPLAY -depth $VNC_COL_DEPTH -geometry $VNC_RESOLUTION &> $STARTUPDIR/no_vnc_startup.log
-echo -e "start window manager\n..."
-mkdir -p $HOME/logs
-$HOME/wm_startup.sh &> $STARTUPDIR/logs/wm_startup.log
+chown -R appbox:appbox /home/appbox/.vnc
 
-## log connect options
-echo -e "\n\n------------------ VNC environment started ------------------"
-echo -e "\nVNCSERVER started on DISPLAY= $DISPLAY \n\t=> connect via VNC viewer with $VNC_IP:$VNC_PORT"
-echo -e "\nnoVNC HTML client started:\n\t=> connect via http://$VNC_IP:$NO_VNC_PORT/?password=...\n"
+cat << EOF >> /etc/supervisor/conf.d/vnc.conf
+[program:vnc]
+command=/bin/sh $STARTUPDIR/root_vnc_startup.sh
+autostart=true
+autorestart=true
+priority=5
+stdout_events_enabled=true
+stderr_events_enabled=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+EOF
 
-if [[ $DEBUG == true ]] || [[ $1 =~ -t|--tail-log ]]; then
-    echo -e "\n------------------ $HOME/.vnc/*$DISPLAY.log ------------------"
-    # if option `-t` or `--tail-log` block the execution and tail the VNC log
-    tail -f $STARTUPDIR/*.log $HOME/.vnc/*$DISPLAY.log
-fi
+cat << EOF >> /etc/supervisor/conf.d/novnc.conf
+[program:novnc]
+command=/bin/sh $STARTUPDIR/root_novnc_startup.sh
+autostart=true
+autorestart=true
+priority=10
+stdout_events_enabled=true
+stderr_events_enabled=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+EOF
 
-if [ -z "$1" ] || [[ $1 =~ -w|--wait ]]; then
-    wait $PID_SUB
-else
-    # unknown option ==> call command
-    echo -e "\n\n------------------ EXECUTE COMMAND ------------------"
-    echo "Executing command: '$@'"
-    exec "$@"
-fi
+exec /usr/bin/supervisord -n -c /etc/supervisord.conf
