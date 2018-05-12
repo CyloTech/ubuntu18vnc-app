@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 ### every exit != 0 fails the script
-set -e
 
 echo "Install some common tools for further installation"
 apt-get update 
@@ -19,9 +18,13 @@ apt-get install -y software-properties-common \
                    wine64 \
                    tmux \
                    screen \
-                   unrar
+                   unrar \
+                   man-db
+
+apt-get install -y chromium-browser chromium-browser-l10n chromium-codecs-ffmpeg
 
 apt-get clean -y
+
 
 # RClone
 curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip; \
@@ -33,7 +36,7 @@ chmod 755 /usr/bin/rclone; \
 mkdir -p /usr/local/share/man/man1; \
 cp rclone.1 /usr/local/share/man/man1/; \
 mandb
-rm -fr /rclone*
+rm -fr rclone*
 
 # RClone Browser
 wget https://github.com/mmozeiko/RcloneBrowser/releases/download/1.2/rclone-browser_1.2_amd64.deb

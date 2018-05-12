@@ -2,6 +2,8 @@
 set -x
 
 mkdir -p /etc/supervisor/conf.d
+mkdir -p /run/sshd
+chmod 755 /run/sshd
 
 echo -e "\n\n------------------ Set User Password ------------------"
 echo "appbox:${USER_PASSWORD}" | chpasswd

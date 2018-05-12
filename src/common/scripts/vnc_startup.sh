@@ -2,22 +2,8 @@
 ### every exit != 0 fails the script
 set -x
 
-
-
 # should also source $STARTUPDIR/generate_container_user
 source $HOME/.bashrc
-
-# add `--skip` to startup args, to skip the VNC startup procedure
-if [[ $1 =~ -s|--skip ]]; then
-    echo -e "\n\n------------------ SKIP VNC STARTUP -----------------"
-    echo -e "\n\n------------------ EXECUTE COMMAND ------------------"
-    echo "Executing command: '${@:2}'"
-    exec "${@:2}"
-fi
-if [[ $1 =~ -d|--debug ]]; then
-    echo -e "\n\n------------------ DEBUG VNC STARTUP -----------------"
-    export DEBUG=true
-fi
 
 ## correct forwarding of shutdown signal
 cleanup () {
@@ -27,7 +13,7 @@ cleanup () {
 trap cleanup SIGINT SIGTERM
 
 ## write correct window size to chrome properties
-$STARTUPDIR/chrome-init.sh
+/bin/sh ${STARTUPDIR}/chrome-init.sh
 
 ## resolve_vnc_connection
 VNC_IP=$(hostname -i)
@@ -40,11 +26,7 @@ chown -R appbox:appbox $HOME
 
 mkdir -p "$HOME/.vnc"
 PASSWD_PATH="$HOME/.vnc/passwd"
-if [[ $VNC_VIEW_ONLY == "true" ]]; then
-    echo "start VNC server in VIEW ONLY mode!"
-    #create random pw to prevent access
-    echo $(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20) | vncpasswd -f > $PASSWD_PATH
-fi
+
 echo "$VNC_PW" | vncpasswd -f >> $PASSWD_PATH
 chmod 600 $PASSWD_PATH
 
@@ -81,5 +63,10 @@ stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 EOF
+
+if [ ! -f /etc/app_installed ]; then
+    curl -i -H "Accept: application/json" -H "Content-Type:application/json" -X POST "https://api.cylo.io/v1/apps/installed/$INSTANCE_ID"
+    touch /etc/app_installed
+fi
 
 exec /usr/bin/supervisord -n -c /etc/supervisord.conf
