@@ -9,7 +9,7 @@ ENV DISPLAY=:1 \
 ### Envrionment config
 ENV HOME=/home/appbox \
     TERM=xterm \
-    STARTUPDIR=/dockerstartup \
+    STARTUPDIR=/usr/local/appbox/starup \
     INST_SCRIPTS=/usr/local/appbox/install \
     NO_VNC_HOME=/usr/local/appbox/noVNC \
     DEBIAN_FRONTEND=noninteractive \
@@ -46,8 +46,8 @@ RUN $INST_SCRIPTS/libnss_wrapper.sh
 ADD ./src/common/scripts $STARTUPDIR
 RUN $INST_SCRIPTS/set_user_permission.sh $STARTUPDIR $HOME
 
-ADD ./src/runasroot.sh /dockerstartup/runasroot.sh
-RUN chmod +x /dockerstartup/runasroot.sh
+ADD ./src/runasroot.sh /usr/local/appbox/starup/runasroot.sh
+RUN chmod +x /usr/local/appbox/starup/runasroot.sh
 
 ADD ./src/supervisord.conf /etc/supervisord.conf
 RUN rm -fr /etc/ssh/sshd_config
@@ -59,4 +59,4 @@ RUN usermod -aG sudo appbox
 # Expose ports
 EXPOSE 80 22 ${VNC_PORT} ${NO_VNC_PORT}
 
-CMD ["/dockerstartup/runasroot.sh"]
+CMD ["/usr/local/appbox/starup/runasroot.sh"]

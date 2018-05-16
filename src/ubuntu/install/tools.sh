@@ -19,7 +19,9 @@ apt-get install -y software-properties-common \
                    tmux \
                    screen \
                    unrar \
-                   man-db
+                   man-db \
+                   transmission \
+                   filezilla
 
 apt-get install -y chromium-browser chromium-browser-l10n chromium-codecs-ffmpeg
 
@@ -27,6 +29,7 @@ apt-get clean -y
 
 
 # RClone
+cd /usr/local/appbox/install
 curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip; \
 unzip rclone-current-linux-amd64.zip; \
 cd rclone-*-linux-amd64; \
@@ -36,7 +39,6 @@ chmod 755 /usr/bin/rclone; \
 mkdir -p /usr/local/share/man/man1; \
 cp rclone.1 /usr/local/share/man/man1/; \
 mandb
-rm -fr rclone*
 
 # RClone Browser
 wget https://github.com/mmozeiko/RcloneBrowser/releases/download/1.2/rclone-browser_1.2_amd64.deb

@@ -10,4 +10,4 @@ echo "appbox:${USER_PASSWORD}" | chpasswd
 
 #exec su -c "/dockerstartup/vnc_startup.sh" -s /bin/sh appbox
 
-/bin/sh /dockerstartup/vnc_startup.sh
+/bin/sh /usr/local/appbox/starup/vnc_startup.sh
