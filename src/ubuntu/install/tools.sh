@@ -15,13 +15,17 @@ apt-get install -y software-properties-common \
                    ffmpeg \
                    unzip \
                    curl \
-                   wine64 \
                    tmux \
                    screen \
                    unrar \
                    man-db \
                    transmission \
-                   filezilla
+                   filezilla \
+                   wine64
+
+dpkg --add-architecture i386
+apt-get update
+apt-get install -y wine32
 
 apt-get install -y chromium-browser chromium-browser-l10n chromium-codecs-ffmpeg
 
@@ -57,14 +61,20 @@ apt update; \
 apt-get install -y python python-pip; \
 pip install flexget
 
-# MKVTool
-sh -c 'echo "deb http://www.bunkus.org/ubuntu/bionic/ ./" >> /etc/apt/sources.list.d/mkvtoolnix.list'; \
+## MKVTool
+wget -q -O - https://mkvtoolnix.download/gpg-pub-moritzbunkus.txt | sudo apt-key add -
+echo "deb https://mkvtoolnix.download/ubuntu/ bionic main
+deb-src https://mkvtoolnix.download/ubuntu/ bionic main" > /etc/apt/sources.list.d/mkvtoolnix.list
 apt update; \
 apt -y install mkvtoolnix-gui
 
 # Handbrake
 add-apt-repository ppa:stebbins/handbrake-releases
 apt -y install handbrake-gtk handbrake-cli
+
+# Wine32
+dpkg --add-architecture i386
+apt-get update -y && apt-get install -y wine32
 
 echo "generate locales für en_US.UTF-8"
 locale-gen en_US.UTF-8

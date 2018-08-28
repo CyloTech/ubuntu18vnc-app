@@ -36,6 +36,8 @@ rm -rfv /tmp/.X*-lock /tmp/.X11-unix &> $STARTUPDIR/vnc_startup.log \
 
 chown -R appbox:appbox /home/appbox/.vnc
 
+chmod -R 755 /home/appbox/.ssh
+
 cat << EOF >> /etc/supervisor/conf.d/vnc.conf
 [program:vnc]
 command=/bin/sh $STARTUPDIR/root_vnc_startup.sh
