@@ -76,5 +76,10 @@ apt -y install handbrake-gtk handbrake-cli
 dpkg --add-architecture i386
 apt-get update -y && apt-get install -y wine32
 
+# qBitorrent
+add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
+apt-get -y update
+apt-get -y install qbittorrent
+
 echo "generate locales für en_US.UTF-8"
 locale-gen en_US.UTF-8
