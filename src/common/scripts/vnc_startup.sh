@@ -34,6 +34,40 @@ echo "remove old vnc locks to be a reattachable container"
 rm -rfv /tmp/.X*-lock /tmp/.X11-unix &> $STARTUPDIR/vnc_startup.log \
 || echo "no locks present"
 
+rm -fr /home/appbox/.vnc/xstartup
+cat << EOF >> /home/appbox/.vnc/xstartup
+#!/bin/sh
+
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+OS=`uname -s`
+if [ $OS = 'Linux' ]; then
+  case "$WINDOWMANAGER" in
+    *gnome*)
+      if [ -e /etc/SuSE-release ]; then
+        PATH=$PATH:/opt/gnome/bin
+        export PATH
+      fi
+      ;;
+  esac
+fi
+
+zenity --warning --text="Appbox Warning\nPlease note that storing data outside of the\n<b>/home/appbox</b> directory will not be stored when updating or moving your Ubuntu app.\n\nClick OK to Continue to Desktop." --width="350"
+
+if [ -x /etc/X11/xinit/xinitrc ]; then
+  exec /etc/X11/xinit/xinitrc
+fi
+if [ -f /etc/X11/xinit/xinitrc ]; then
+  exec sh /etc/X11/xinit/xinitrc
+fi
+
+[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+xsetroot -solid grey
+xterm -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
+twm &
+EOF
+chmod +x /home/appbox/.vnc/xstartup
+
 chown -R appbox:appbox /home/appbox/.vnc
 
 chmod -R 755 /home/appbox/.ssh
@@ -65,6 +99,7 @@ stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 EOF
+
 
 if [ ! -f /etc/app_installed ]; then
     curl -i -H "Accept: application/json" -H "Content-Type:application/json" -X POST "https://api.cylo.io/v1/apps/installed/$INSTANCE_ID"

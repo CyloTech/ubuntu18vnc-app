@@ -21,7 +21,8 @@ apt-get install -y software-properties-common \
                    man-db \
                    transmission \
                    filezilla \
-                   wine64
+                   wine64 \
+                   zenity
 
 dpkg --add-architecture i386
 apt-get update
