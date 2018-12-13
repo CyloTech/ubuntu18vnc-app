@@ -16,6 +16,10 @@ user_pref("app.update.lastUpdateTime.microsummary-generator-update-timer", 12225
 user_pref("app.update.lastUpdateTime.search-engine-update-timer", 1182010203);
 EOF_FF
     > $ff_def/user.js
+
+echo '\n// Disable tabs autostart as a workaround for random crashing\n\
+// See https://github.com/SeleniumHQ/docker-selenium/issues/388\n\
+lockPref("browser.tabs.remote.autostart.2", false);' >> $ff_def/firefox.js
 }
 
 #copy from org/sakuli/common/bin/installer_scripts/linux/install_firefox_portable.sh

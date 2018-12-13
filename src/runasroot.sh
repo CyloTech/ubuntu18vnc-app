@@ -1,6 +1,8 @@
 #!/bin/bash
 set -x
 
+
+
 mkdir -p /etc/supervisor/conf.d
 mkdir -p /run/sshd
 chmod 755 /run/sshd
