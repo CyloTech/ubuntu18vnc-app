@@ -55,7 +55,12 @@ ADD ./src/sshd_config /etc/ssh/sshd_config
 
 RUN adduser -u 1000 appbox
 RUN usermod -aG sudo appbox
-RUN usermod -g 107 sshd
+
+RUN groupmod -g 9999 nogroup
+RUN usermod -g 9999 nobody
+RUN usermod -u 9999 nobody
+RUN usermod -g 9999 sshd
+RUN usermod -g 9999 sync
 
 # Expose ports
 EXPOSE 80 22 ${VNC_PORT} ${NO_VNC_PORT}
