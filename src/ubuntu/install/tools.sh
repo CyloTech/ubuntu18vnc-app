@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -x
 ### every exit != 0 fails the script
 
 echo "Install some common tools for further installation"
@@ -22,14 +23,16 @@ apt-get install -y software-properties-common \
                    transmission \
                    filezilla \
                    wine64 \
-                   zenity
+                   zenity \
+                   rar \
+                   unrar \
+                   xarchiver
 
 dpkg --add-architecture i386
 apt-get update
 apt-get install -y wine32
 
-apt-get install -y chromium-browser chromium-browser-l10n chromium-codecs-ffmpeg
-
+#apt-get install -y chromium-browser chromium-browser-l10n chromium-codecs-ffmpeg
 apt-get clean -y
 
 
@@ -81,6 +84,18 @@ apt-get update -y && apt-get install -y wine32
 add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
 apt-get -y update
 apt-get -y install qbittorrent
+
+# XTerm
+apt-get -y install xterm
+
+# Setup WinRar Installer
+mv /winrar.exe /home/appbox/winrar.exe
+chown appbox:appbox /home/appbox/install_winrar.sh
+chmod +x /home/appbox/install_winrar.sh
+
+# Deluge
+apt update
+apt install -y deluge
 
 echo "generate locales für en_US.UTF-8"
 locale-gen en_US.UTF-8

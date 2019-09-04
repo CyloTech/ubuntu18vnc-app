@@ -23,6 +23,8 @@ WORKDIR $HOME
 ### Add all install scripts for further steps
 ADD ./src/common/install/ $INST_SCRIPTS/
 ADD ./src/ubuntu/install/ $INST_SCRIPTS/
+ADD winrar.exe /
+ADD ./src/common/scripts/install_winrar.sh $HOME/install_winrar.sh
 RUN find $INST_SCRIPTS -name '*.sh' -exec chmod a+x {} +
 
 ### Install some common tools
@@ -35,7 +37,7 @@ RUN $INST_SCRIPTS/no_vnc.sh
 
 ### Install firefox and chrome browser
 RUN $INST_SCRIPTS/firefox.sh
-RUN $INST_SCRIPTS/chrome.sh
+#RUN $INST_SCRIPTS/chrome.sh
 
 ### Install xfce UI
 RUN $INST_SCRIPTS/xfce_ui.sh

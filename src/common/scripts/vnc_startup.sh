@@ -13,7 +13,7 @@ cleanup () {
 trap cleanup SIGINT SIGTERM
 
 ## write correct window size to chrome properties
-/bin/sh ${STARTUPDIR}/chrome-init.sh
+#/bin/sh ${STARTUPDIR}/chrome-init.sh
 
 ## resolve_vnc_connection
 VNC_IP=$(hostname -i)
@@ -52,7 +52,7 @@ if [ $OS = 'Linux' ]; then
   esac
 fi
 
-zenity --warning --text="Appbox Warning\nPlease note that storing data outside of the\n<b>/home/appbox</b> directory will not be stored when updating or moving your Ubuntu app.\n\nClick OK to Continue to Desktop." --width="350"
+zenity --warning --text="Appbox Warning\nPlease note that storing data outside of the\n<b>/home/appbox/data</b> directory will not be stored when updating or moving your Ubuntu app.\n\nClick OK to Continue to Desktop." --width="350"
 
 if [ -x /etc/X11/xinit/xinitrc ]; then
   exec /etc/X11/xinit/xinitrc
@@ -65,12 +65,19 @@ fi
 xsetroot -solid grey
 xterm -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
 twm &
+
 EOF
 chmod +x /home/appbox/.vnc/xstartup
 
 chown -R appbox:appbox /home/appbox/.vnc
 
-chmod -R 755 /home/appbox/.ssh
+mkdir /home/appbox/.ssh
+chmod 700 /home/appbox/.ssh
+touch /home/appbox/.ssh/authorized_keys
+chmod 600 /home/appbox/.ssh/authorized_keys
+chmod 770 /home/appbox
+chown -R appbox:appbox /home/appbox/.ssh
+
 
 cat << EOF >> /etc/supervisor/conf.d/vnc.conf
 [program:vnc]
@@ -105,5 +112,8 @@ if [ ! -f /etc/app_installed ]; then
     curl -i -H "Accept: application/json" -H "Content-Type:application/json" -X POST "https://api.cylo.io/v1/apps/installed/$INSTANCE_ID"
     touch /etc/app_installed
 fi
+
+# Set firefox as the default browser
+update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/bin/firefox 200
 
 exec /usr/bin/supervisord -n -c /etc/supervisord.conf
